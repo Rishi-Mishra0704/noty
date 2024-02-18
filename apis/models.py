@@ -20,12 +20,3 @@ class SharedNote(models.Model):
     def __str__(self):
         return f"{self.note.owner.username} passed note to {self.shared_to.username}"
 
-
-class NoteVersion(models.Model):
-    note = models.ForeignKey(Note, related_name='versions', on_delete=models.CASCADE)
-    timestamp = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    changes = models.TextField()
-
-    def __str__(self):
-        return f"Version {self.id} of Note {self.note.id}"
