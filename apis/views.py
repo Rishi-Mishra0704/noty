@@ -81,8 +81,13 @@ def share_note(request):
 
 
 @api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def note_history_view(request, note_id):
     note = Note.objects.get(id=note_id)
     history = note.history.all()
-    serializer = NoteHistorySerializer(history, many=True)
+    
+    since_creation_history = [version for version in history if version.history_date >= note.created_at]
+    
+    serializer = NoteHistorySerializer(since_creation_history, many=True)
     return Response(serializer.data)
