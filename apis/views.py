@@ -11,12 +11,23 @@ from rest_framework.response import Response
 from .models import Note, SharedNote
 from .serializers import NoteHistorySerializer, SharedNoteSerializer, NoteSerializer
 
-
-
 @api_view(['GET', 'PUT'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def note(request, note_id):
+    """
+    Retrieve or update a note.
+
+    GET: Retrieve the note details.
+    PUT: Update the note content.
+
+    Args:
+        request: HTTP request object.
+        note_id: ID of the note to retrieve or update.
+
+    Returns:
+        HTTP response with the note details or update status.
+    """
     try:
         note = Note.objects.get(pk=note_id)
     except Note.DoesNotExist:
@@ -46,12 +57,19 @@ def note(request, note_id):
     # Handle invalid HTTP method
     return Response({'detail': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-
-
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def note_create(request):
+    """
+    Create a new note.
+
+    Args:
+        request: HTTP request object.
+
+    Returns:
+        HTTP response with the created note details or validation errors.
+    """
     serializer = NoteSerializer(data=request.data)
     if serializer.is_valid():
         serializer.validated_data['owner'] = request.user
@@ -60,11 +78,19 @@ def note_create(request):
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def share_note(request):
+    """
+    Share a note with another user.
+
+    Args:
+        request: HTTP request object.
+
+    Returns:
+        HTTP response with the shared note details or error message.
+    """
     try:
         note_id = request.data.get('note_id')
         shared_to_id = request.data.get('shared_to_id')
@@ -81,11 +107,20 @@ def share_note(request):
     serializer = SharedNoteSerializer(shared_note)
     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def note_history(request, note_id):
+    """
+    Retrieve the version history of a note.
+
+    Args:
+        request: HTTP request object.
+        note_id: ID of the note to retrieve history for.
+
+    Returns:
+        HTTP response with the version history of the note.
+    """
     note = get_object_or_404(Note, id=note_id)
     history = note.history.all()
     
