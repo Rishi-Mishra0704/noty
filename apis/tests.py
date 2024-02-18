@@ -12,21 +12,57 @@ class NoteAPITestCase(TestCase):
         self.client.force_authenticate(user=self.user)
         self.note = Note.objects.create(title='Test Note', content='Test Content', owner=self.user)
     
-    def test_get_note_detail(self):
-        url = reverse('note_details', args=[self.note.id])
+    def test_get_existing_note(self):
+        url = reverse('note', args=[self.note.id])
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['title'], 'Test Note')
         self.assertEqual(response.data['content'], 'Test Content')
     
-    def test_update_note(self):
-        url = reverse('note_details', args=[self.note.id])
+    def test_get_non_existing_note(self):
+        url = reverse('note', args=[999])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.data['detail'], 'Note not found')
+    
+    def test_get_note_without_permission(self):
+        other_user = User.objects.create_user(username='otheruser', password='password')
+        self.client.force_authenticate(user=other_user)
+        url = reverse('note', args=[self.note.id])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+    
+    def test_update_note_with_valid_content(self):
+        url = reverse('note', args=[self.note.id])
         updated_content = 'Updated Content'
         response = self.client.put(url, {'content': updated_content}, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['detail'], 'Note updated successfully')
         self.note.refresh_from_db()
         self.assertIn(updated_content, self.note.content)
+    
+    def test_update_note_with_missing_content(self):
+        url = reverse('note', args=[self.note.id])
+        response = self.client.put(url, {}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['detail'], 'Content is required for updating the note')
+        # Ensure note content is not changed
+        self.note.refresh_from_db()
+        self.assertNotEqual(self.note.content, '')
+    
+    def test_update_note_without_permission(self):
+        other_user = User.objects.create_user(username='otheruser', password='password')
+        self.client.force_authenticate(user=other_user)
+        url = reverse('note', args=[self.note.id])
+        response = self.client.put(url, {'content': 'Updated Content'}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.data['detail'], 'You do not have permission to edit this note')
+    
+    def test_invalid_http_method(self):
+        url = reverse('note', args=[self.note.id])
+        response = self.client.post(url, {}, format='json') 
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(response.data['detail'], 'Method "POST" not allowed.')
     
     def test_create_note(self):
         url = reverse('note_create')

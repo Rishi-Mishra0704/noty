@@ -1,17 +1,16 @@
-from django.utils import timezone
-from django.shortcuts import get_object_or_404, render
-from rest_framework.response import Response
-from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from rest_framework import status
 from django.contrib.auth.models import User
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
 
+from rest_framework import status
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 from .models import Note, SharedNote
 from .serializers import NoteHistorySerializer, SharedNoteSerializer, NoteSerializer
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
 
-# Create your views here.
 
 
 @api_view(['GET', 'PUT'])
@@ -35,15 +34,18 @@ def note(request, note_id):
 
     elif request.method == 'PUT':
         updated_content = request.data.get('content')
-        if not updated_content:
+        if updated_content is None:
             return Response({'detail': 'Content is required for updating the note'}, status=status.HTTP_400_BAD_REQUEST)
 
         note.content += '\n' + updated_content
-
         note.updated_at = timezone.now()
         note.save()
 
         return Response({'detail': 'Note updated successfully'}, status=status.HTTP_200_OK)
+
+    # Handle invalid HTTP method
+    return Response({'detail': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
 
 
 @api_view(['POST'])
