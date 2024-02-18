@@ -12,18 +12,29 @@ from rest_framework.permissions import IsAuthenticated
 # Create your views here.
 
 
-@api_view(['GET'])
+@api_view(['GET', 'PUT'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
-def note_detail(request, note_id):
-
+def note(request, note_id):
     try:
         note = Note.objects.get(pk=note_id)
-    except note.DoesNotExist:
+    except Note.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
-    serializer = NoteSerializer(note)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+    if request.method == 'GET':
+        serializer = NoteSerializer(note)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    elif request.method == 'PUT':
+        serializer = NoteSerializer(note, data=request.data)
+        if serializer.is_valid():
+            # Set the owner of the note to the authenticated user
+            serializer.validated_data['owner'] = request.user
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 
@@ -38,3 +49,5 @@ def note_create(request):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
