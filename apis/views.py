@@ -1,5 +1,5 @@
 from django.utils import timezone
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework import status
@@ -83,8 +83,8 @@ def share_note(request):
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
-def note_history_view(request, note_id):
-    note = Note.objects.get(id=note_id)
+def note_history(request, note_id):
+    note = get_object_or_404(Note, id=note_id)
     history = note.history.all()
     
     since_creation_history = [version for version in history if version.history_date >= note.created_at]
