@@ -1,0 +1,20 @@
+User for testing
+{
+    "username": "example_user",
+    "password": "Pass1234.",
+    "email": "user@example.com"
+}
+
+
+Note for testing
+{
+    "title": "Sample Note",
+    "content": "This is a sample note content.",
+    "owner": 1
+}
+
+Share Note for testing
+{
+    "note": 1,
+    "shared_to": 2,
+}
