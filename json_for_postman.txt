@@ -1,8 +1,15 @@
-User for testing
+User for Signup testing
 {
     "username": "example_user",
     "password": "Pass1234.",
     "email": "user@example.com"
+}
+
+
+User for Login testing
+{
+    "username": "example_user",
+    "password": "Pass1234.",
 }
 
 

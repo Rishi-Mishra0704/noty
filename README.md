@@ -174,6 +174,12 @@ cd desired-folder
 
 For seamless testing, utilize the provided JSON data in `json_for_postman.txt` with Postman.
 
+## Note:
+- **Accessing the API requires authentication.**
+- **To authenticate, either login or sign up if not already registered. Upon successful authentication, you will receive a token in the response. This token must be passed in the Header under the Authorization field for subsequent requests.**
+- **You can use the user JSON for sign up or login available in the `json_for_postman.txt` file.**
+
+
 ### Testing
 To run the tests, execute the following command:
 
