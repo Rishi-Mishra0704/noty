@@ -14,9 +14,9 @@ class Note(models.Model):
 
 class SharedNote(models.Model):
     note = models.ForeignKey(Note, related_name='shared_notes', on_delete=models.CASCADE)
-    shared_from = models.ForeignKey(User, related_name='shared_notes_sent', on_delete=models.CASCADE)
     shared_to = models.ForeignKey(User, related_name='shared_notes_received', on_delete=models.CASCADE)
     shared_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.note.title} shared from {self.shared_from.username} to {self.shared_to.username}"
+        return f"{self.note.title} shared to {self.shared_to.username}"
+
