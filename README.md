@@ -178,6 +178,12 @@ For seamless testing, utilize the provided JSON data in `json_for_postman.txt` w
 - **Accessing the API requires authentication.**
 - **To authenticate, either login or sign up if not already registered. Upon successful authentication, you will receive a token in the response. This token must be passed in the Header under the Authorization field for subsequent requests.**
 - **You can use the user JSON for sign up or login available in the `json_for_postman.txt` file.**
+- **To add the token in Postman:**
+  1. After logging in or signing up and obtaining the token, open Postman.
+  2. Select the request you want to send to the API.
+  3. Click on the Headers tab.
+  4. Add a new header with key "Authorization" and value "Token [your_token_here]", replacing "[your_token_here]" with the actual token obtained from the authentication response.
+
 
 
 ### Testing
