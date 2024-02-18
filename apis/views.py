@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 
 
 from .models import Note, SharedNote
-from .serializers import SharedNoteSerializer, NoteSerializer
+from .serializers import NoteHistorySerializer, SharedNoteSerializer, NoteSerializer
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
@@ -78,3 +78,11 @@ def share_note(request):
         note=note, shared_to=shared_to_user)
     serializer = SharedNoteSerializer(shared_note)
     return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@api_view(['GET'])
+def note_history_view(request, note_id):
+    note = Note.objects.get(id=note_id)
+    history = note.history.all()
+    serializer = NoteHistorySerializer(history, many=True)
+    return Response(serializer.data)
