@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
@@ -20,22 +21,25 @@ def note(request, note_id):
     try:
         note = Note.objects.get(pk=note_id)
     except Note.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response({'detail': 'Note not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    if not request.user.is_superuser and request.user != note.owner and not SharedNote.objects.filter(note=note, shared_to=request.user).exists():
+        return Response({'detail': 'You do not have permission to edit this note'}, status=status.HTTP_403_FORBIDDEN)
 
     if request.method == 'GET':
         serializer = NoteSerializer(note)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
     elif request.method == 'PUT':
-        serializer = NoteSerializer(note, data=request.data)
-        if serializer.is_valid():
-            serializer.validated_data['owner'] = request.user
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        updated_content = request.data.get('content')
+        if not updated_content:
+            return Response({'detail': 'Content is required for updating the note'}, status=status.HTTP_400_BAD_REQUEST)
 
+        note.content += '\n' + updated_content
 
+        note.updated_at = timezone.now()
+        note.save()
+
+        return Response({'detail': 'Note updated successfully'}, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -49,7 +53,8 @@ def note_create(request):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
+
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -65,6 +70,7 @@ def share_note(request):
     if note.owner != request.user:
         return Response({'detail': 'You do not have permission to share this note'}, status=status.HTTP_403_FORBIDDEN)
 
-    shared_note = SharedNote.objects.create(note=note, shared_to=shared_to_user)
+    shared_note = SharedNote.objects.create(
+        note=note, shared_to=shared_to_user)
     serializer = SharedNoteSerializer(shared_note)
     return Response(serializer.data, status=status.HTTP_201_CREATED)
