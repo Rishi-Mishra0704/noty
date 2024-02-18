@@ -161,6 +161,19 @@ To run the project, execute the following command:
 cd desired-folder
  python manage.py runserver
  ```
+ To get started, access the server at [http://localhost:8000/](http://localhost:8000/) and utilize the following endpoints to interact with the API:
+
+- **Authentication**:
+  - [http://localhost:8000/login](http://localhost:8000/login) (for logging in)
+  - [http://localhost:8000/signup](http://localhost:8000/signup) (for signing up)
+
+- **Note Operations**:
+  - [http://localhost:8000/notes/{id}](http://localhost:8000/notes/{id}) (for fetching and updating specific notes)
+  - [http://localhost:8000/notes/create](http://localhost:8000/notes/create) (for creating new notes)
+  - [http://localhost:8000/notes/version-history/{id}](http://localhost:8000/notes/version-history/{id}) (for retrieving the version history of a note)
+
+For seamless testing, utilize the provided JSON data in `json_for_postman.txt` with Postman.
+
 
 <h1>Watch the video demo for more understanding the usage.</h1>
 
