@@ -5,7 +5,7 @@ from rest_framework import status
 from django.contrib.auth.models import User
 
 
-from .models import Note
+from .models import Note, SharedNote
 from .serializers import SharedNoteSerializer, NoteSerializer
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -50,7 +50,6 @@ def note_create(request):
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -66,14 +65,6 @@ def share_note(request):
     if note.owner != request.user:
         return Response({'detail': 'You do not have permission to share this note'}, status=status.HTTP_403_FORBIDDEN)
 
-    shared_note_data = {
-        'note': note,
-        'shared_from': request.user,
-        'shared_to': shared_to_user
-    }
-    serializer = SharedNoteSerializer(data=shared_note_data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    else:
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    shared_note = SharedNote.objects.create(note=note, shared_to=shared_to_user)
+    serializer = SharedNoteSerializer(shared_note)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)

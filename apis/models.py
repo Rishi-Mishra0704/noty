@@ -18,5 +18,6 @@ class SharedNote(models.Model):
     shared_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.note.title} shared to {self.shared_to.username}"
+        return f"{self.note.owner.username} passed note to {self.shared_to.username}"
+
 
