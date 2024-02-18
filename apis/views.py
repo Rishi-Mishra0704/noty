@@ -27,8 +27,12 @@ def note(request, note_id):
         return Response({'detail': 'You do not have permission to edit this note'}, status=status.HTTP_403_FORBIDDEN)
 
     if request.method == 'GET':
-        serializer = NoteSerializer(note)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        if request.user == note.owner or request.user in note.shared_users.all():
+            serializer = NoteSerializer(note)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response({'detail': 'You do not have permission to view this note'}, status=status.HTTP_403_FORBIDDEN)
+
     elif request.method == 'PUT':
         updated_content = request.data.get('content')
         if not updated_content:
