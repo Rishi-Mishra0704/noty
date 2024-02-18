@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Note, SharedNote
+from .models import Note, SharedNote, NoteVersion
 
 class NoteSerializer(serializers.ModelSerializer):
     class Meta:
@@ -13,3 +13,9 @@ class SharedNoteSerializer(serializers.ModelSerializer):
         fields = ['id', 'note', 'shared_to', 'shared_at']
         read_only_fields = ['id', 'shared_at']
 
+
+class NoteVersionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NoteVersion
+        fields = ['id', 'timestamp', 'user', 'changes']
+        read_only_fields = ['id', 'timestamp', 'user', 'changes']
